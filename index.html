@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Healthcare Prediction - Diabetes Risk</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 10%, transparent 20%);
+            transform: rotate(30deg);
+            pointer-events: none;
+        }
+
+        h2 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            background: linear-gradient(to right, #00c6ff, #0072ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #b0c4de;
+        }
+
+        input, select {
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        input:focus, select:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #00c6ff;
+            box-shadow: 0 0 10px rgba(0, 198, 255, 0.3);
+        }
+
+        select option {
+            background: #203a43;
+            color: #fff;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-check {
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            color: #fff;
+            box-shadow: 0 10px 20px rgba(0, 114, 255, 0.3);
+            flex: 2;
+        }
+
+        .btn-check:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px rgba(0, 114, 255, 0.4);
+        }
+
+        .btn-clear {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            flex: 1;
+        }
+
+        .btn-clear:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        #res {
+            margin-top: 30px;
+            display: none;
+            padding: 20px;
+            border-radius: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #st {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        #ad {
+            font-size: 15px;
+            color: #b0c4de;
+            line-height: 1.5;
+        }
+
+        /* Status Colors */
+        .status-danger { color: #ff4b4b; text-shadow: 0 0 10px rgba(255,75,75,0.4); }
+        .status-warning { color: #ffb84d; text-shadow: 0 0 10px rgba(255,184,77,0.4); }
+        .status-safe { color: #00e676; text-shadow: 0 0 10px rgba(0,230,118,0.4); }
+        
+        .loader {
+            display: none;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid #00c6ff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto 0;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="glass-card">
+    <h2>Diabetes Risk Assessment</h2>
+    
+    <div class="form-grid">
+        <div class="input-group">
+            <label>Age Range</label>
+            <select id="age">
+                <option value="0">0-10</option><option value="1">10-20</option>
+                <option value="2">20-30</option><option value="3">30-40</option>
+                <option value="4" selected>40-50</option><option value="5">50-60</option>
+                <option value="6">60-70</option><option value="7">70-80</option>
+                <option value="8">80-90</option><option value="9">90-100</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Time in Hospital (Days)</label>
+            <input type="number" id="time_in_hospital" value="3" min="1" max="14">
+        </div>
+        <div class="input-group">
+            <label>Number of Lab Procedures</label>
+            <input type="number" id="num_lab_procedures" value="45">
+        </div>
+        <div class="input-group">
+            <label>Number of Procedures</label>
+            <input type="number" id="num_procedures" value="2">
+        </div>
+        <div class="input-group">
+            <label>Number of Medications</label>
+            <input type="number" id="num_medications" value="15">
+        </div>
+        <div class="input-group">
+            <label>Number of Diagnoses</label>
+            <input type="number" id="number_diagnoses" value="7">
+        </div>
+        <div class="input-group">
+            <label>Max Glucose Serum</label>
+            <select id="max_glu_serum">
+                <option value="0" selected>None / Not Measured</option>
+                <option value="1">Normal</option>
+                <option value="2">> 200</option>
+                <option value="3">> 300</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>A1C Result</label>
+            <select id="A1Cresult">
+                <option value="0" selected>None / Not Measured</option>
+                <option value="1">Normal</option>
+                <option value="2">> 7</option>
+                <option value="3">> 8</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Medication Changed?</label>
+            <select id="change">
+                <option value="0" selected>No</option>
+                <option value="1">Yes</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>On Diabetes Meds?</label>
+            <select id="diabetesMed">
+                <option value="0">No</option>
+                <option value="1" selected>Yes</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="btn-row">
+        <button class="btn-check" onclick="check()">Assess Risk Level</button>
+        <button class="btn-clear" onclick="clearData()">Reset</button>
+    </div>
+
+    <div class="loader" id="loader"></div>
+
+    <div id="res">
+        <div id="st"></div>
+        <div id="ad"></div>
+    </div>
+</div>
+
+<script>
+    function check() {
+        const fields = ["age", "time_in_hospital", "num_lab_procedures", "num_procedures", 
+                        "num_medications", "number_diagnoses", "max_glu_serum", "A1Cresult", 
+                        "change", "diabetesMed"];
+        let payload = {};
+        
+        for (let f of fields) {
+            let val = document.getElementById(f).value;
+            if (val === "") {
+                alert("Please fill all fields.");
+                return;
+            }
+            payload[f] = val;
+        }
+
+        document.getElementById("res").style.display = "none";
+        document.getElementById("loader").style.display = "block";
+
+        fetch("http://127.0.0.1:5000/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        })
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById("loader").style.display = "none";
+            document.getElementById("res").style.display = "block";
+            
+            let stEl = document.getElementById("st");
+            stEl.innerText = data.prediction;
+            
+            stEl.className = ""; // Reset class
+            if (data.prediction === "Diabetic") stEl.classList.add("status-danger");
+            else if (data.prediction === "Pre-Diabetic") stEl.classList.add("status-warning");
+            else if (data.prediction === "Non-Diabetic") stEl.classList.add("status-safe");
+            else stEl.classList.add("status-danger"); // Error
+            
+            document.getElementById("ad").innerText = data.recommendation;
+        })
+        .catch(e => {
+            document.getElementById("loader").style.display = "none";
+            document.getElementById("res").style.display = "block";
+            let stEl = document.getElementById("st");
+            stEl.innerText = "Connection Failed";
+            stEl.className = "status-danger";
+            document.getElementById("ad").innerText = "Unable to reach the backend model. Is app.py running?";
+        });
+    }
+
+    function clearData() {
+        document.getElementById("time_in_hospital").value = "3";
+        document.getElementById("num_lab_procedures").value = "45";
+        document.getElementById("num_procedures").value = "2";
+        document.getElementById("num_medications").value = "15";
+        document.getElementById("number_diagnoses").value = "7";
+        document.getElementById("res").style.display = "none";
+    }
+</script>
+
+</body>
+</html>

@@ -2,16 +2,21 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import joblib
 import numpy as np
+import os
 
 app = Flask(__name__)
 CORS(app)
 
-model = joblib.load("diabetes_model.pkl")
-scaler = joblib.load("scaler.pkl")
+# Get the absolute path of the directory containing app.py
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Load models using the absolute path
+model = joblib.load(os.path.join(BASE_DIR, "diabetes_model.pkl"))
+scaler = joblib.load(os.path.join(BASE_DIR, "scaler.pkl"))
 
 @app.route("/")
 def home():
-    return send_from_directory(".", "index.html")
+    return send_from_directory(BASE_DIR, "index.html")
 
 @app.route("/predict", methods=["POST"])
 def predict():

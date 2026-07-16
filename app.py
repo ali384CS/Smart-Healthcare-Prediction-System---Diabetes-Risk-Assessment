@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import joblib
 import numpy as np
@@ -8,6 +8,10 @@ CORS(app)
 
 model = joblib.load("diabetes_model.pkl")
 scaler = joblib.load("scaler.pkl")
+
+@app.route("/")
+def home():
+    return send_from_directory(".", "index.html")
 
 @app.route("/predict", methods=["POST"])
 def predict():
